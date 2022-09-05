@@ -1,0 +1,120 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://addons/star_dock_file_editor/file_editor_dock.gd" id="1_s7f7r"]
+[ext_resource type="PackedScene" path="res://addons/star_dock_file_editor/Editors/StarScriptEditor.tscn" id="2_omao0"]
+
+[sub_resource type="InputEventKey" id="InputEventKey_nkbo7"]
+command_pressed = true
+pressed = true
+keycode = 70
+
+[sub_resource type="Shortcut" id="Shortcut_ob5am"]
+events = [SubResource("InputEventKey_nkbo7")]
+
+[sub_resource type="GDScript" id="GDScript_asdrc"]
+script/source = "@tool
+extends ItemList
+
+func _can_drop_data(at_position, data):
+	match data.type:
+		\"files\":
+			return true
+	return false
+
+func _drop_data(at_position, data):
+	match data.type:
+		\"files\":
+			print(data.files)
+			get_parent().get_parent()._on_files_selected(data.files)
+"
+
+[node name="Control" type="HBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+script = ExtResource("1_s7f7r")
+extensions = {
+"ssh": "StarScript"
+}
+editors = {
+"StarScript": ExtResource("2_omao0")
+}
+
+[node name="V" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+offset_right = 200.0
+offset_bottom = 900.0
+size_flags_vertical = 3
+
+[node name="H" type="HBoxContainer" parent="V"]
+layout_mode = 2
+offset_right = 200.0
+offset_bottom = 31.0
+
+[node name="BtnFile" type="MenuButton" parent="V/H"]
+layout_mode = 2
+offset_right = 35.0
+offset_bottom = 31.0
+shortcut = SubResource("Shortcut_ob5am")
+text = "File"
+switch_on_hover = true
+item_count = 5
+popup/item_0/text = "New"
+popup/item_0/id = 0
+popup/item_1/text = "Open..."
+popup/item_1/id = 1
+popup/item_2/text = "Save"
+popup/item_2/id = 2
+popup/item_3/text = "Save As..."
+popup/item_3/id = 3
+popup/item_4/text = "Close"
+popup/item_4/id = 4
+
+[node name="TabList" type="ItemList" parent="V"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+offset_top = 35.0
+offset_right = 200.0
+offset_bottom = 900.0
+size_flags_vertical = 3
+script = SubResource("GDScript_asdrc")
+
+[node name="M" type="MarginContainer" parent="."]
+layout_mode = 2
+offset_left = 204.0
+offset_right = 1600.0
+offset_bottom = 900.0
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="TabContainer" type="TabContainer" parent="M"]
+layout_mode = 2
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 1392.0
+offset_bottom = 896.0
+size_flags_horizontal = 3
+theme_override_constants/side_margin = 0
+theme_override_constants/icon_separation = 0
+theme_override_constants/outline_size = 0
+tabs_visible = false
+all_tabs_in_front = true
+
+[node name="FileDialog" type="FileDialog" parent="."]
+title = "Open a File"
+size = Vector2i(1349, 400)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.ssh, *.char, *.pool")
+
+[connection signal="item_selected" from="V/TabList" to="." method="_on_tab_selected"]
+[connection signal="file_selected" from="FileDialog" to="." method="_on_file_selected"]
+[connection signal="files_selected" from="FileDialog" to="." method="_on_files_selected"]
